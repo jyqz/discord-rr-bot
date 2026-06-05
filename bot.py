@@ -36,10 +36,10 @@ async def rr(ctx, *, raw: str = ""):
 
     if len(parts) not in (3, 4):
         await ctx.send(
-            "**Usage:** `!r <notional>,<leverage>,<type>[,<long|short>]`\n"
+            "**Usage:** `!r <entry>,<notional>,<type>[,<long|short>]`\n"
             "**Examples:**\n"
-            "`!r 100000,10,scalp`\n"
-            "`!r 100000,10,scalp,short`\n\n"
+            "`!r 100000,50000,scalp`\n"
+            "`!r 100000,50000,scalp,short`\n\n"
             "```\n"
             "scalp    — SL 0.5%  / TP 1.0%\n"
             "intraday — SL 1.0%  / TP 3.0%\n"
@@ -50,17 +50,17 @@ async def rr(ctx, *, raw: str = ""):
         return
 
     try:
-        notional = float(parts[0])
-        leverage = float(parts[1])
+        entry    = float(parts[0])
+        notional = float(parts[1])
         ttype    = parts[2].lower()
     except ValueError:
-        await ctx.send("❌ Notional and leverage must be numbers.")
+        await ctx.send("❌ Entry and notional must be numbers.")
         return
 
     direction = parts[3].lower() if len(parts) == 4 else "long"
 
-    if notional <= 0 or leverage <= 0:
-        await ctx.send("❌ Notional and leverage must be positive.")
+    if entry <= 0 or notional <= 0:
+        await ctx.send("❌ Entry and notional must be positive.")
         return
 
     if ttype not in TRADE_PROFILES:
@@ -74,18 +74,17 @@ async def rr(ctx, *, raw: str = ""):
 
     sl_pct = TRADE_PROFILES[ttype]["sl"]
     tp_pct = TRADE_PROFILES[ttype]["tp"]
-    capital    = notional / leverage
     max_loss   = notional * sl_pct / 100
     max_profit = notional * tp_pct / 100
     rr_ratio   = tp_pct / sl_pct
 
     if direction == "long":
-        sl_price = notional * (1 - sl_pct / 100)
-        tp_price = notional * (1 + tp_pct / 100)
+        sl_price = entry * (1 - sl_pct / 100)
+        tp_price = entry * (1 + tp_pct / 100)
         direction_label = "📈  LONG"
     else:
-        sl_price = notional * (1 + sl_pct / 100)
-        tp_price = notional * (1 - tp_pct / 100)
+        sl_price = entry * (1 + sl_pct / 100)
+        tp_price = entry * (1 - tp_pct / 100)
         direction_label = "📉  SHORT"
 
     embed = discord.Embed(
@@ -93,9 +92,8 @@ async def rr(ctx, *, raw: str = ""):
         color=PROFILE_COLORS[ttype],
     )
 
+    embed.add_field(name="Entry Price",   value=f"${entry:,.2f}",    inline=True)
     embed.add_field(name="Notional Size", value=f"${notional:,.2f}", inline=True)
-    embed.add_field(name="Leverage",      value=f"{leverage:.0f}x",  inline=True)
-    embed.add_field(name="Capital",       value=f"${capital:,.2f}",  inline=True)
 
 
     embed.add_field(name="​", value="​", inline=False)
@@ -138,7 +136,7 @@ async def help_command(ctx):
         color=discord.Color.green(),
     )
     embed.add_field(
-        name="!r <notional>,<leverage>,<type>[,<direction>]",
+        name="!r <entry>,<notional>,<type>[,<direction>]",
         value=(
             "Calculate risk/reward for a trade.\n\n"
             "**Types:**\n"
@@ -147,8 +145,8 @@ async def help_command(ctx):
             "`swing` — SL 2.0% / TP 6.0%\n\n"
             "**Direction:** `long` or `short` (default: `long`)\n\n"
             "**Examples:**\n"
-            "`!r 100000,10,scalp`\n"
-            "`!r 100000,10,swing,short`"
+            "`!r 100000,50000,scalp`\n"
+            "`!r 100000,50000,swing,short`"
         ),
         inline=False,
     )
