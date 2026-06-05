@@ -36,7 +36,7 @@ async def rr(ctx, *, raw: str = ""):
 
     if len(parts) not in (4, 5):
         await ctx.send(
-            "**Usage:** `!r <entry>,<leverage>,<capital>,<type>[,<long|short>]`\n"
+            "**Usage:** `!r <notional>,<leverage>,<capital>,<type>[,<long|short>]`\n"
             "**Examples:**\n"
             "`!r 100000,10,60000,scalp`\n"
             "`!r 100000,10,60000,scalp,short`\n\n"
@@ -50,18 +50,18 @@ async def rr(ctx, *, raw: str = ""):
         return
 
     try:
-        entry    = float(parts[0])
+        notional = float(parts[0])
         leverage = float(parts[1])
         capital  = float(parts[2])
         ttype    = parts[3].lower()
     except ValueError:
-        await ctx.send("❌ Entry, leverage, and capital must be numbers.")
+        await ctx.send("❌ Notional, leverage, and capital must be numbers.")
         return
 
     direction = parts[4].lower() if len(parts) == 5 else "long"
 
-    if entry <= 0 or leverage <= 0 or capital <= 0:
-        await ctx.send("❌ Entry, leverage, and capital must be positive.")
+    if notional <= 0 or leverage <= 0 or capital <= 0:
+        await ctx.send("❌ Notional, leverage, and capital must be positive.")
         return
 
     if ttype not in TRADE_PROFILES:
@@ -81,12 +81,12 @@ async def rr(ctx, *, raw: str = ""):
     rr_ratio   = tp_pct / sl_pct
 
     if direction == "long":
-        sl_price = entry * (1 - sl_pct / 100)
-        tp_price = entry * (1 + tp_pct / 100)
+        sl_price = notional * (1 - sl_pct / 100)
+        tp_price = notional * (1 + tp_pct / 100)
         direction_label = "📈  LONG"
     else:
-        sl_price = entry * (1 + sl_pct / 100)
-        tp_price = entry * (1 - tp_pct / 100)
+        sl_price = notional * (1 + sl_pct / 100)
+        tp_price = notional * (1 - tp_pct / 100)
         direction_label = "📉  SHORT"
 
     embed = discord.Embed(
@@ -94,9 +94,9 @@ async def rr(ctx, *, raw: str = ""):
         color=PROFILE_COLORS[ttype],
     )
 
-    embed.add_field(name="Entry",    value=f"${entry:,.2f}",   inline=True)
-    embed.add_field(name="Leverage", value=f"{leverage:.0f}x", inline=True)
-    embed.add_field(name="Capital",  value=f"${capital:,.2f}", inline=True)
+    embed.add_field(name="Notional Size", value=f"${notional:,.2f}", inline=True)
+    embed.add_field(name="Leverage",      value=f"{leverage:.0f}x",  inline=True)
+    embed.add_field(name="Capital",       value=f"${capital:,.2f}",  inline=True)
 
     embed.add_field(name="​", value="​", inline=False)
 
@@ -148,7 +148,8 @@ async def help_command(ctx):
             "**Direction:** `long` or `short` (default: `long`)\n\n"
             "**Examples:**\n"
             "`!r 100000,10,60000,scalp`\n"
-            "`!r 100000,10,60000,swing,short`"
+            "`!r 100000,10,60000,swing,short`\n\n"
+            "_Parameters: notional size, leverage, capital, type, direction_"
         ),
         inline=False,
     )
