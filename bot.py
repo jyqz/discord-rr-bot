@@ -131,6 +131,30 @@ async def rr(ctx, *, raw: str = ""):
     await ctx.send(embed=embed)
 
 
+@bot.command(name="help")
+async def help_command(ctx):
+    embed = discord.Embed(
+        title="📖  RR Bot Help",
+        color=discord.Color.green(),
+    )
+    embed.add_field(
+        name="!r <entry>,<leverage>,<capital>,<type>[,<direction>]",
+        value=(
+            "Calculate risk/reward for a trade.\n\n"
+            "**Types:**\n"
+            "`scalp` — SL 0.5% / TP 1.0%\n"
+            "`intraday` — SL 1.0% / TP 3.0%\n"
+            "`swing` — SL 2.0% / TP 6.0%\n\n"
+            "**Direction:** `long` or `short` (default: `long`)\n\n"
+            "**Examples:**\n"
+            "`!r 100000,10,60000,scalp`\n"
+            "`!r 100000,10,60000,swing,short`"
+        ),
+        inline=False,
+    )
+    await ctx.send(embed=embed)
+
+
 token = os.getenv("DISCORD_TOKEN")
 if not token:
     raise RuntimeError("DISCORD_TOKEN not set in .env")
