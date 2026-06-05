@@ -125,7 +125,7 @@ async def rr(ctx, *, raw: str = ""):
     )
 
     embed.set_footer(
-        text=f"Position: ${position:,.2f}  |  SL {sl_pct}% / TP {tp_pct}%"
+        text=f"SL {sl_pct}% / TP {tp_pct}%"
     )
 
     await ctx.send(embed=embed)
